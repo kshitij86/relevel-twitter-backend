@@ -3,6 +3,9 @@ module.exports = {
     REGISTER_SUCCESS: "User has been registered successfully",
     REGISTER_FAILURE: "User could not be registered",
     EXISTING_USER: "User is already registered",
+    LOGIN_SUCCESS: "User has been logged in successfully",
+    LOGIN_FAILURE: "User could not be logged in",
+    INVALID_REQUEST: "The request parameters are invalid",
   },
   HTTP_STATUS: {
     OK: 200,

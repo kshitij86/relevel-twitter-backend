@@ -1,4 +1,6 @@
 const { User } = require("../models");
+const { isEmpty } = require("lodash");
+const { hashSync, genSaltSync } = require("bcryptjs");
 const {
   AUTHENTICATION,
   HTTP_STATUS,
@@ -18,11 +20,13 @@ const register = async (req, res) => {
       const existingUser = await User.findOne({ email: email }).catch((err) =>
         console.error(err)
       );
+      await genSaltSync(10);
+      const hashed_password = await hashSync(password);
       if (isEmpty(existingUser)) {
         const newUser = {
           name: name,
           email: email,
-          password: password,
+          password: hashed_password,
         };
         await User.create(newUser);
         res.status(HTTP_STATUS.RESOURCE_CREATED);

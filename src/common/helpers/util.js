@@ -1,9 +1,8 @@
 const jwt = require("jsonwebtoken");
+const { isEmpty } = require("lodash");
 
 const checkIfValid = (params) => {
-  params.forEach((key) => {
-    if (key === null || key === undefined) return false;
-  });
+  if (isEmpty(params)) return false;
   return true;
 };
 

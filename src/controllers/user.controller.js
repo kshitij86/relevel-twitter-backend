@@ -5,18 +5,20 @@ const {
   AUTHENTICATION,
   HTTP_STATUS,
   COMMON,
+  TWEET,
 } = require("../common/helpers/constants");
 const { checkIfValid, formatResponse } = require("../common/helpers/util");
+const Tweet = require("../models/Tweet");
 
 const register = async (req, res) => {
   //register api logic here
-  let { name, email, password } = req.body;
   let response = formatResponse(AUTHENTICATION.REGISTER_SUCCESS, "");
   try {
-    if (!checkIfValid([name, email, password])) {
+    if (!checkIfValid(req.body)) {
       res.status(HTTP_STATUS.BAD_REQUEST);
       response.message = COMMON.ACTION_FAILURE;
     } else {
+      let { name, email, password } = req.body;
       const existingUser = await User.findOne({ email: email }).catch((err) =>
         console.error(err)
       );
@@ -47,16 +49,16 @@ const register = async (req, res) => {
 
 const follow = async (req, res) => {
   //follow api logic here
-  let { following_user_id, followed_user_id } = req.body;
-  let response = formatResponse(
-    `${following_user_id} is now following ${followed_user_id}`,
-    []
-  );
   try {
-    if (!checkIfValid([followed_user_id, following_user_id])) {
+    if (!checkIfValid(req.body)) {
       res.status(HTTP_STATUS.BAD_REQUEST);
       response.message = COMMON.ACTION_FAILURE;
     } else {
+      let { following_user_id, followed_user_id } = req.body;
+      let response = formatResponse(
+        `${following_user_id} is now following ${followed_user_id}`,
+        []
+      );
       const followed_user = await User.findOne({ user_id: followed_user_id });
       const following_user = await User.findOne({ user_id: following_user_id });
       const usersExist = !isEmpty(followed_user) && !isEmpty(following_user);
@@ -92,14 +94,15 @@ const follow = async (req, res) => {
 
 const getFollowers = async (req, res) => {
   //getFollowers api logic here
-  const { user_id } = req.body;
   let response = formatResponse(COMMON.ACTION_SUCCESS);
 
   try {
-    if (!checkIfValid([user_id])) {
+    if (!checkIfValid(req.body)) {
       res.status(HTTP_STATUS.BAD_REQUEST);
       response.message = COMMON.ACTION_FAILURE;
     } else {
+      let { user_id } = req.body;
+
       await User.findOne({ user_id: user_id }).then((existingUser) => {
         response.data = existingUser.followers;
       });
@@ -120,8 +123,39 @@ const searchUsers = (req, res) => {
   //searchUsers api logic here
 };
 
-const getTweetsForUser = (req, res) => {
+const getTweetsForUser = async (req, res) => {
   //get all tweets for a user api logic here
+  let response = formatResponse(COMMON.ACTION_SUCCESS, []);
+  try {
+    if (!checkIfValid(req.body)) {
+      res.status(HTTP_STATUS.BAD_REQUEST);
+      response.message = COMMON.ACTION_FAILURE;
+    } else {
+      let { user_id } = req.body;
+      const existingUser = await User.findOne({ user_id: user_id });
+      if (isEmpty(existingUser)) {
+        res.status(HTTP_STATUS.BAD_REQUEST);
+        response.message = TWEET.TWEET_USER_NOT_FOUND;
+      } else {
+        let tweetsForUser = [];
+        let allTweets = await Tweet.find({ created_by: user_id });
+        allTweets.forEach((item) =>
+          tweetsForUser.push({
+            likes: item.likes,
+            tweet_id: item.tweet_id,
+            tweet_body: item.tweet_body,
+          })
+        );
+        response.message = TWEET.TWEET_FETCH_SUCCESS;
+        response.data = tweetsForUser;
+      }
+    }
+  } catch (err) {
+    res.status(HTTP_STATUS.SERVER_ERROR);
+    response.message = TWEET.TWEET_FETCH_FAILURE;
+    console.error(err);
+  }
+  res.send(response);
 };
 
 const UserController = {

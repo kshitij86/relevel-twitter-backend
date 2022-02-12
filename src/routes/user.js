@@ -1,9 +1,16 @@
 const { Router } = require("express");
 const router = Router();
-const UserController = require("../controllers/user.controller");
+const {
+  register,
+  follow,
+  getFollowers,
+  getTweetsForUser,
+} = require("../controllers/user.controller");
 
 // Create routes for user here
-router.post("/register", UserController.register);
-router.post("/follow", UserController.follow);
-router.get("/get-followers", UserController.getFollowers);
+router.post("/register", register);
+router.post("/follow", follow);
+router.get("/get-followers", getFollowers);
+router.get("/get-tweets", getTweetsForUser);
+
 module.exports = router;

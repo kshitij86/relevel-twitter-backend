@@ -13,13 +13,13 @@ const {
 
 const login = async (req, res) => {
   //login api logic here
-  const { email, password } = req.body;
   let response = formatResponse(AUTHENTICATION.LOGIN_SUCCESS);
   try {
-    if (!checkIfValid([email, password])) {
+    if (!checkIfValid(req.body)) {
       res.status(HTTP_STATUS.BAD_REQUEST);
-      response.message = AUTHENTICATION.INVALID_REQUEST;
+      response.message = COMMON.INVALID_REQUEST;
     } else {
+      let { email, password } = req.body;
       const existingUser = await User.findOne({ email: email });
       if (compareSync(password, existingUser.password)) {
         //login success, send a signed token

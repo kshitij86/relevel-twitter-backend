@@ -10,6 +10,7 @@ const {
   HTTP_STATUS,
   COMMON,
 } = require("../common/helpers/constants");
+const { isEmpty } = require("lodash");
 
 const login = async (req, res) => {
   //login api logic here
@@ -21,18 +22,23 @@ const login = async (req, res) => {
     } else {
       let { email, password } = req.body;
       const existingUser = await User.findOne({ email: email });
-      if (compareSync(password, existingUser.password)) {
-        //login success, send a signed token
-        res.status(HTTP_STATUS.OK);
-        response.data = [
-          {
-            auth_token: await genJWTToken(),
-          },
-        ];
-      } else {
-        //login failure
+      if (isEmpty(existingUser)) {
         res.status(HTTP_STATUS.BAD_REQUEST);
-        response.message = AUTHENTICATION.LOGIN_FAILURE;
+        response.message = AUTHENTICATION.USER_NOT_FOUND;
+      } else {
+        if (compareSync(password, existingUser.password)) {
+          //login success, send a signed token
+          res.status(HTTP_STATUS.OK);
+          response.data = [
+            {
+              auth_token: await genJWTToken(),
+            },
+          ];
+        } else {
+          //login failure
+          res.status(HTTP_STATUS.BAD_REQUEST);
+          response.message = AUTHENTICATION.LOGIN_FAILURE;
+        }
       }
     }
   } catch (err) {

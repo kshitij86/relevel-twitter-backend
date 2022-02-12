@@ -12,13 +12,13 @@ const Tweet = require("../models/Tweet");
 
 const register = async (req, res) => {
   //register api logic here
-  let response = formatResponse(AUTHENTICATION.REGISTER_SUCCESS, "");
+  let response = formatResponse(AUTHENTICATION.REGISTER_SUCCESS, []);
   try {
     if (!checkIfValid(req.body)) {
       res.status(HTTP_STATUS.BAD_REQUEST);
       response.message = COMMON.ACTION_FAILURE;
     } else {
-      let { name, email, password } = req.body;
+      let { username, email, password } = req.body;
       const existingUser = await User.findOne({ email: email }).catch((err) =>
         console.error(err)
       );
@@ -26,13 +26,13 @@ const register = async (req, res) => {
       const hashed_password = await hashSync(password);
       if (isEmpty(existingUser)) {
         const newUser = {
-          name: name,
+          username: username,
           email: email,
           password: hashed_password,
         };
         await User.create(newUser);
         res.status(HTTP_STATUS.RESOURCE_CREATED);
-        response.data = { name: name, email: email };
+        response.data = { username: username, email: email };
       } else {
         res.status(HTTP_STATUS.BAD_REQUEST);
         response.message = AUTHENTICATION.EXISTING_USER;
@@ -125,11 +125,11 @@ const searchUsers = (req, res) => {
 
 const getTweetsForUser = async (req, res) => {
   //get all tweets for a user api logic here
-  let response = formatResponse(COMMON.ACTION_SUCCESS, []);
+  let response = formatResponse(TWEET.TWEET_FETCH_SUCCESS, []);
   try {
     if (!checkIfValid(req.body)) {
       res.status(HTTP_STATUS.BAD_REQUEST);
-      response.message = COMMON.ACTION_FAILURE;
+      response.message = COMMON.EMPTY_PARAMETERS;
     } else {
       let { user_id } = req.body;
       const existingUser = await User.findOne({ user_id: user_id });
@@ -146,13 +146,40 @@ const getTweetsForUser = async (req, res) => {
             tweet_body: item.tweet_body,
           })
         );
-        response.message = TWEET.TWEET_FETCH_SUCCESS;
         response.data = tweetsForUser;
       }
     }
   } catch (err) {
     res.status(HTTP_STATUS.SERVER_ERROR);
     response.message = TWEET.TWEET_FETCH_FAILURE;
+    console.error(err);
+  }
+  res.send(response);
+};
+
+const deleteUser = async (req, res) => {
+  //delete user here
+  //if user is deleted, all his tweets should automatically be deleted as well
+  let response = formatResponse(AUTHENTICATION.USER_DELETE_SUCCESS, []);
+  try {
+    if (!checkIfValid(req.body)) {
+      res.status(HTTP_STATUS.BAD_REQUEST);
+      response.message = COMMON.EMPTY_PARAMETERS;
+    } else {
+      let { user_id } = req.body;
+      const existingUser = await User.findOne({ user_id: user_id });
+      if (isEmpty(existingUser)) {
+        res.status(HTTP_STATUS.BAD_REQUEST);
+        response.message = AUTHENTICATION.USER_NOT_FOUND;
+      } else {
+        await Tweet.deleteMany({ created_by: user_id });
+        await User.deleteOne({ user_id: user_id });
+        res.status(HTTP_STATUS.OK);
+      }
+    }
+  } catch (err) {
+    res.status(HTTP_STATUS.SERVER_ERROR);
+    response.message = AUTHENTICATION.USER_DELETE_FAILED;
     console.error(err);
   }
   res.send(response);
@@ -165,6 +192,7 @@ const UserController = {
   getUserStats,
   searchUsers,
   getTweetsForUser,
+  deleteUser,
 };
 
 module.exports = UserController;

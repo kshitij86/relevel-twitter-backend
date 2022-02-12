@@ -12,7 +12,7 @@ const tweet = async (req, res) => {
       res.status(HTTP_STATUS.BAD_REQUEST);
       response.message = COMMON.EMPTY_PARAMETERS;
     } else {
-      let { user_id, tweet_body } = req.body;
+      let { username, tweet_body, user_id } = req.body;
       const existingUser = await User.findOne({ user_id: user_id });
       if (isEmpty(existingUser)) {
         res.status(HTTP_STATUS.BAD_REQUEST);
@@ -36,8 +36,30 @@ const tweet = async (req, res) => {
   res.send(response);
 };
 
-const deleteTweet = (req, res) => {
+const deleteTweet = async (req, res) => {
   //deleteTweet api logic here
+  let response = formatResponse(TWEET.TWEET_DELETE_SUCCESS, []);
+  try {
+    if (!checkIfValid(req.body)) {
+      res.status(HTTP_STATUS.BAD_REQUEST);
+      response.message = COMMON.EMPTY_PARAMETERS;
+    } else {
+      let { tweet_id } = req.body;
+      const existingTweet = await Tweet.findOne({ tweet_id: tweet_id });
+      if (isEmpty(existingTweet)) {
+        res.status(HTTP_STATUS.BAD_REQUEST);
+        response.message = TWEET.TWEET_NOT_FOUND;
+      } else {
+        await Tweet.deleteOne({ tweet_id: tweet_id });
+        res.status(HTTP_STATUS.RESOURCE_CREATED);
+      }
+    }
+  } catch (err) {
+    res.status(HTTP_STATUS.SERVER_ERROR);
+    response.message = TWEET.TWEET_DELETE_FAILURE;
+    console.error(err);
+  }
+  res.send(response);
 };
 
 const likeTweet = async (req, res) => {
@@ -49,9 +71,10 @@ const likeTweet = async (req, res) => {
       response.message = COMMON.EMPTY_PARAMETERS;
     } else {
       let { tweet_id, user_id } = req.body;
-      const exisitingUser = User.findOne({ user_id: user_id });
-      const existingTweet = Tweet.findOne({ tweet_id });
-      if (!isEmpty(exisitingUser) && !isEmpty(existingTweet)) {
+      const existingUser = await User.findOne({ user_id: user_id });
+      const existingTweet = await Tweet.findOne({ tweet_id: tweet_id });
+
+      if (!isEmpty(existingUser) && !isEmpty(existingTweet)) {
         await Tweet.findOneAndUpdate(
           { tweet_id: tweet_id },
           {

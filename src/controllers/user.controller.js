@@ -115,14 +115,18 @@ const follow = async (req, res) => {
  */
 const getFollowers = async (req, res) => {
   //getFollowers api logic here
-  let response = formatResponse(COMMON.ACTION_SUCCESS);
+  let response = formatResponse("", []);
 
   try {
     let { user_id } = req.body;
 
-    await User.findOne({ user_id: user_id }).then((existingUser) => {
+    const existingUser = await User.findOne({ user_id: user_id });
+    if (isEmpty(existingUser)) {
+      res.status(HTTP_STATUS.NOT_FOUND);
+      response.message = AUTHENTICATION.USER_NOT_FOUND;
+    } else {
       response.data = existingUser.followers;
-    });
+    }
   } catch (err) {
     res.status(HTTP_STATUS.SERVER_ERROR);
     response.message = COMMON.ACTION_FAILURE;

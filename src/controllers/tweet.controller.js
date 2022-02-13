@@ -26,7 +26,7 @@ const tweet = async (req, res) => {
         created_by: user_id,
       };
 
-      await Tweet.create(newTweet);
+      const createdTweet = await Tweet.create(newTweet);
       await User.findOneAndUpdate(
         { user_id: user_id },
         {
@@ -37,6 +37,11 @@ const tweet = async (req, res) => {
       );
       res.status(HTTP_STATUS.OK);
       response.message = TWEET.TWEET_SUCCESS;
+      response.data = [
+        {
+          tweet_id: createdTweet.tweet_id,
+        },
+      ];
     }
   } catch (err) {
     res.status(HTTP_STATUS.SERVER_ERROR);

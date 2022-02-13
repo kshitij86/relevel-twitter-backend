@@ -30,6 +30,7 @@ const login = async (req, res) => {
         res.status(HTTP_STATUS.OK);
         response.data = [
           {
+            user_id: existingUser.user_id,
             auth_token: await genJWTToken(email),
           },
         ];

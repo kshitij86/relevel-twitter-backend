@@ -1,6 +1,6 @@
 const { isEmpty } = require("lodash");
 const { User } = require("../models");
-const { formatResponse, checkIfValid } = require("../common/helpers/util");
+const { formatResponse } = require("../common/helpers/util");
 const { HTTP_STATUS, TWEET, COMMON } = require("../common/helpers/constants");
 const Tweet = require("../models/Tweet");
 
@@ -12,8 +12,7 @@ const Tweet = require("../models/Tweet");
  */
 
 const tweet = async (req, res) => {
-  //create a tweet
-  let response = formatResponse(TWEET.TWEET_SUCCESS, []);
+  let response = formatResponse("", []);
   try {
     let { username, tweet_body, user_id } = req.body;
     const existingUser = await User.findOne({ user_id: user_id });
@@ -36,7 +35,7 @@ const tweet = async (req, res) => {
         }
       );
       res.status(HTTP_STATUS.OK);
-      response.message = TWEET.TWEET_SUCCESS;
+      response.message = `Tweet: ${createdTweet.tweet_id} is successfully tweeted by ${existingUser.username}`;
       response.data = [
         {
           tweet_id: createdTweet.tweet_id,
@@ -59,7 +58,6 @@ const tweet = async (req, res) => {
  */
 
 const deleteTweet = async (req, res) => {
-  //deleteTweet api logic here
   let response = formatResponse(TWEET.TWEET_DELETE_SUCCESS, []);
   try {
     let { tweet_id, user_id } = req.body;
@@ -76,8 +74,8 @@ const deleteTweet = async (req, res) => {
       await User.findOneAndUpdate(
         { user_id: user_id },
         {
-          $dec: {
-            tweets_count: 1,
+          $inc: {
+            tweets_count: -1,
           },
         }
       );

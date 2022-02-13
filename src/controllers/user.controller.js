@@ -36,7 +36,7 @@ const register = async (req, res) => {
       res.status(HTTP_STATUS.RESOURCE_CREATED);
       response.data = { username: username, email: email };
     } else {
-      res.status(HTTP_STATUS.BAD_REQUEST);
+      res.status(HTTP_STATUS.ALREADY_EXISTS);
       response.message = AUTHENTICATION.EXISTING_USER;
     }
   } catch (err) {
@@ -96,7 +96,7 @@ const follow = async (req, res) => {
         res.status(HTTP_STATUS.OK);
       }
     } else {
-      res.status(HTTP_STATUS.BAD_REQUEST);
+      res.status(HTTP_STATUS.NOT_FOUND);
       response.message = AUTHENTICATION.USER_NOT_FOUND;
     }
   } catch (err) {
@@ -177,7 +177,7 @@ const getTweetsForUser = async (req, res) => {
     let { user_id } = req.body;
     const existingUser = await User.findOne({ user_id: user_id });
     if (isEmpty(existingUser)) {
-      res.status(HTTP_STATUS.BAD_REQUEST);
+      res.status(HTTP_STATUS.NOT_FOUND);
       response.message = TWEET.TWEET_USER_NOT_FOUND;
     } else {
       let tweetsForUser = [];
@@ -214,7 +214,7 @@ const deleteUser = async (req, res) => {
     let { user_id } = req.body;
     const existingUser = await User.findOne({ user_id: user_id });
     if (isEmpty(existingUser)) {
-      res.status(HTTP_STATUS.BAD_REQUEST);
+      res.status(HTTP_STATUS.NOT_FOUND);
       response.message = AUTHENTICATION.USER_NOT_FOUND;
     } else {
       await Tweet.deleteMany({ created_by: user_id });

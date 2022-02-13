@@ -8,16 +8,12 @@ const { SERVER_PORT, NODE_ENV } = require("./config/config");
 const { mongoConnect } = require("./models/mongodbUtil");
 
 const app = express();
-
 app.use(express.json());
 app.use(cors());
 
-// problematic part
-// app.use("/", (req, res) => {
-//   res.send({
-//     message: "Welcome to Relevel Twitter clone. Try /api for more info.",
-//   });
-// });
+/**
+ * Connect to the MongoDB instace
+ */
 mongoConnect();
 
 app.use("/api", routes);

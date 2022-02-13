@@ -5,10 +5,17 @@ const {
   likeTweet,
   deleteTweet,
 } = require("../controllers/tweet.controller");
+const {
+  validateRequestBody,
+  validateAuthorization,
+} = require("../common/middleware/middleware");
 
-router.post("/new", tweet);
-router.get("/like", likeTweet);
-router.get("/delete", deleteTweet);
+/**
+ * Route for all tweet related actions
+ */
 
-// Create routes for product here
+router.post("/new", validateAuthorization, validateRequestBody, tweet);
+router.get("/like", validateAuthorization, validateRequestBody, likeTweet);
+router.get("/delete", validateAuthorization, validateRequestBody, deleteTweet);
+
 module.exports = router;

@@ -1,29 +1,26 @@
 const jwt = require("jsonwebtoken");
-const { isEmpty } = require("lodash");
+const { JWT_SECRET } = require("../../config/config");
 
-const checkIfValid = (params) => {
-  if (isEmpty(params)) return false;
-  return true;
-};
-
+/**
+ * Format an HTTP response, based on message and data provided
+ */
 const formatResponse = (message, data) => {
   let formattedResponse = { message: message, data: data };
   return formattedResponse;
 };
 
-const genJWTToken = async (email, type) => {
+/**
+ * Sign a JWT token to authorize requests to protected resources
+ */
+const genJWTToken = async (email) => {
   const expTime = 1000 * 60 * 60 * 60; //expires in 30 mins
-  const authenticationToken = "AwerT$&*123PoqweCv";
-  const token = jwt.sign({ id: email, type: type }, authenticationToken, {
+  const token = jwt.sign({ email: email }, JWT_SECRET, {
     expiresIn: expTime,
   });
   return token;
 };
 
-const Util = {
-  checkIfValid,
+module.exports = {
   formatResponse,
   genJWTToken,
 };
-
-module.exports = Util;

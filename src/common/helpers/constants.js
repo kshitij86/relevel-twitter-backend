@@ -6,9 +6,13 @@ module.exports = {
     LOGIN_SUCCESS: "User has been logged in successfully",
     LOGIN_FAILURE: "User could not be logged in",
     USER_NOT_FOUND:
-      "That user is not registered with us. Create an account and try again",
+      "One or more users not registered with us. Create an account and try again",
     USER_DELETE_SUCCESS: "User was deleted successfully",
     USER_DELETE_FAILED: "User could not be deleted",
+    USER_STATS_SUCCESS: "User stats fetched successfully",
+    USER_STATS_FAILURE: "User stats could not be fetched",
+    TOKEN_EXPIRED: "Your session has expired, please login and try again",
+    NO_TOKEN: "That request is not authorized",
   },
   TWEET: {
     TWEET_SUCCESS: "That tweet was tweeted successfully",
@@ -29,6 +33,7 @@ module.exports = {
     RESOURCE_CREATED: 201,
     NOT_FOUND: 404,
     BAD_REQUEST: 400,
+    UNAUTHORIZED: 401,
     AUTH_FAILURE: 401,
     SERVER_ERROR: 500,
     ALREADY_EXISTS: 403,
